@@ -1,0 +1,24 @@
+# docker-composeのバージョンを指定
+version: '3.8'
+
+services:
+  # サービス名を「app」と定義
+  app:
+    # ビルドコンテキストをカレントディレクトリに設定
+    build:
+      context: .
+      # Dockerfileに渡す引数を設定
+      args:
+        # ホストの環境変数$UIDと$GIDを渡す。未設定の場合は1000をデフォルト値とする
+        USER_ID: ${UID:-1000}
+        GROUP_ID: ${GID:-1000}
+    # サービス名を指定
+    container_name: my_python_app
+    # ホストの./srcディレクトリをコンテナの/app/srcにマウント
+    volumes:
+      - ./src:/app/src
+    ports:
+      - 8000:8000
+    # コンテナの標準入力を開き、TTYを割り当てる (インタラクティブな操作に必要)
+    stdin_open: true
+    tty: true
