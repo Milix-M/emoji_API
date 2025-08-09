@@ -26,6 +26,9 @@ class EmojiParamDTO:
     FONT_NAME_PATH_MAPPING = {
         "M+ 1p black": "/fonts/MPLUS1p-Black.ttf",
         "Rounded M+ 1p black": "/fonts/rounded-mplus-1p-black.ttf",
+        "Noto Sans JP": "/fonts/NotoSansJP-Black.ttf",
+        "Sawarabi Mincho": "/fonts/SawarabiMincho-Regular.ttf",
+        "YuseiMagic": "/fonts/YuseiMagic-Regular.ttf",
     }
     text: str = "絵文\n字。"
     width: int = 128
