@@ -17,8 +17,10 @@ services:
     # ホストの./srcディレクトリをコンテナの/app/srcにマウント
     volumes:
       - ./src:/app/src
+      - ./fonts:/fonts
     ports:
       - 8000:8000
     # コンテナの標準入力を開き、TTYを割り当てる (インタラクティブな操作に必要)
     stdin_open: true
     tty: true
+    command: python -m src.app
