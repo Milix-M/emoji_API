@@ -8,7 +8,7 @@ ARG GROUP_ID
 
 # rootユーザーでパッケージのインストールとユーザー作成を行う
 RUN apt-get update && \
-    apt-get install -y sudo fontconfig libgl1-mesa-dev libopencv-dev && \
+    apt-get install -y sudo fontconfig libgl1-mesa-dev libglu1-mesa libopencv-dev && \
     # 受け取ったIDでグループとユーザーを作成
     addgroup --gid $GROUP_ID dockeruser && \
     adduser --uid $USER_ID --gid $GROUP_ID --disabled-password --gecos "" dockeruser && \
@@ -34,7 +34,7 @@ COPY --chown=dockeruser:dockeruser ./common_lib/emojilib-1.0.1-cp39-cp39-linux_x
 RUN pip install --no-cache-dir ./emojilib-1.0.1-cp39-cp39-linux_x86_64.whl
 
 COPY --chown=dockeruser:dockeruser ./requirements.txt /app/
-RUN pip install -r --no-cache-dir ./requirements.txt
+RUN pip install --no-cache-dir -r ./requirements.txt
 
 # コンテナ起動時のデフォルトコマンド (インタラクティブなPythonシェルを起動)
 CMD [ "python" ]

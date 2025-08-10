@@ -1,10 +1,21 @@
-from dataclasses import dataclass, asdict
-from typing import Optional, Literal
-from ..util.emoji_generate import emoji_generate
+import logging
+from dataclasses import dataclass
+from typing import Literal
+
+import emojilib
 import falcon
 
+from ..common.constants import Fonts
+
+# ログ設定
+logging.basicConfig(
+    level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+)
+logger = logging.getLogger(__name__)
+
+
 # 'align'パラメータの選択肢をリテラル型で定義
-# これにより、'left', 'center', 'right' 以外は型チェッカーでエラーにできます
+# これにより、'left', 'center', 'right' 以外は型チェッカーでエラーにできる
 AlignOptions = Literal["left", "center", "right"]
 
 
@@ -22,21 +33,64 @@ class EmojiParamDTO:
     align: AlignOptions = "center"
     size_fixed: bool = False
     disable_stretch: bool = False
-    typeface_file: Optional[str] = None  # Noneを許容するためOptionalを使用
-    typeface_name: Optional[str] = None
+    typeface_file: str = Fonts.FONT_NAME_PATH_MAPPING["M+ 1p black"]["path"]
+    typeface_name: str = "M+ 1p black"
     format: str = "png"
     quality: int = 100
+
+    def emoji_generate(self, req_dto):
+        """DTOを基に絵文字画像を生成し、'emoji.png'として保存する。
+
+        `typeface_name`からフォントパスを解決し、emojilibで画像を生成する。
+
+        Args:
+            req_dto (EmojiParamDTO): 画像生成用のパラメータを持つDTO。
+                関数内で`typeface_file`が設定され、`typeface_name`はNoneに更新される。
+
+        Raises:
+            KeyError: 不正なフォント名が指定された場合に発生する。
+        """
+
+        # フォント名からフォントパスを出す
+        req_dto.typeface_file = Fonts.FONT_NAME_PATH_MAPPING[req_dto.typeface_name][
+            "path"
+        ]
+
+        # Noneにしないと何故かエラーになる
+        req_dto.typeface_name = None
+
+        try:
+            logger.info("絵文字生成中...")
+            # 絵文字生成
+            emoji_raw = emojilib.generate(
+                text=req_dto.text,
+                width=req_dto.width,
+                height=req_dto.height,
+                color=req_dto.color,
+                background_color=req_dto.background_color,
+                align=req_dto.align,
+                size_fixed=req_dto.size_fixed,
+                disable_stretch=req_dto.disable_stretch,
+                typeface_file=req_dto.typeface_file,
+                typeface_name=req_dto.typeface_name,
+                format=req_dto.format,
+                quality=req_dto.quality,
+            )
+            logger.info("絵文字生成完了")
+            return emoji_raw
+        except Exception as e:
+            logger.error(f"絵文字生成でエラーが発生しました: {e}")
+            raise falcon.HTTPInternalServerError(
+                title="Image generation error",
+                description=f"An error occurred while generating the image: {e}",
+            )
 
     def on_post(self, req, resp):
         """
         画像生成のリクエストを受け付け、DTOにマッピングして処理します。
         """
         try:
-            # 1. リクエストボディのJSONを取得
             req_param = req.get_media()
-
-            # 2. 辞書をアンパックしてDTOをインスタンス化
-            #    JSONのキーがDTOの属性名と一致している必要がある
             dto = EmojiParamDTO(**req_param)
 
         except (TypeError, ValueError) as e:
@@ -47,19 +101,19 @@ class EmojiParamDTO:
                 description=f"Request body is invalid or missing required fields. Error: {e}",
             )
 
-        # 3. DTOを使って何らかの処理を行う (この例では画像生成をシミュレート)
-        #    dto.text, dto.width などで安全にパラメータにアクセスできる
-        print(
-            f"画像生成リクエストを受け付けました: text='{dto.text}', width={dto.width}"
-        )
+        logger.info(f"画像生成リクエストを受け付けました: {req_param}")
 
-        emoji_generate(dto)
+        try:
+            image_data = self.emoji_generate(dto)
 
-        # 4. 成功レスポンスを返す
-        #    受け取ったパラメータをDTO経由で確認のために返す
-        resp.status = falcon.HTTP_200
-        resp.media = {
-            "status": "success",
-            "message": "Image generation request received.",
-            "received_parameters": asdict(dto),  # DTOを辞書に変換して返す
-        }
+            resp.status = falcon.HTTP_200
+            resp.content_type = falcon.MEDIA_PNG
+            resp.data = image_data
+
+        except Exception as e:
+            # 画像生成中のエラーをハンドリング
+            logger.error(f"リクエスト処理中にエラー: {e}")
+            raise falcon.HTTPInternalServerError(
+                title="Image Generation Failed",
+                description="An unexpected error occurred during image generation.",
+            )
