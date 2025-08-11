@@ -3,7 +3,7 @@ from wsgiref.simple_server import make_server
 from .dto.emoji_parameter import EmojiParamDTO
 from .dto.font_resorce import EmojiResource
 
-api = falcon.App()
+api = falcon.App(cors_enable=True)
 api.add_route("/emoji", EmojiParamDTO())
 api.add_route("/fonts", EmojiResource())
 
