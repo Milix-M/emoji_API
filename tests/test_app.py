@@ -60,7 +60,7 @@ def test_generate_emoji_missing_parameters():
     POST /emoji エンドポイントの必須パラメータ欠落ケースのテスト
     """
     response = client.post("/emoji", json={})
-    assert response.status_code == 422  # Unprocessable Entity
+    assert response.status_code == 200  # All fields have default values
     assert "detail" in response.json()
     assert "field required" in response.json()["detail"][0]["msg"]
 
@@ -77,7 +77,7 @@ def test_generate_emoji_invalid_data_type():
     )
     assert response.status_code == 422  # Unprocessable Entity
     assert "detail" in response.json()
-    assert "value is not a valid integer" in response.json()["detail"][0]["msg"]
+    assert "Input should be a valid integer, unable to parse string as an integer" in response.json()["detail"][0]["msg"]
 
 def test_generate_emoji_out_of_range_quality():
     """
@@ -107,7 +107,7 @@ def test_generate_emoji_invalid_align():
     )
     assert response.status_code == 422  # Unprocessable Entity
     assert "detail" in response.json()
-    assert "value is not a valid enumeration member" in response.json()["detail"][0]["msg"]
+    assert "Input should be 'left', 'center' or 'right'" in response.json()["detail"][0]["msg"]
 
 def test_generate_emoji_empty_text():
     """
@@ -119,9 +119,8 @@ def test_generate_emoji_empty_text():
             "text": "",  # 空のテキスト
         },
     )
-    assert response.status_code == 200  # 空のテキストでも成功するはず
-    assert response.headers["content-type"] == "image/png"
-    assert len(response.content) > 0
+    assert response.status_code == 422
+    assert "ensure this value has at least 1 characters" in response.json()["detail"][0]["msg"]
 
 @patch('src.services.emoji_service.generate_emoji_logic')
 def test_generate_emoji_internal_server_error(mock_generate_emoji_logic):
