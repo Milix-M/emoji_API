@@ -1,4 +1,3 @@
-pip-licenses
 pytest
 httpx
 pytest-asyncio
