@@ -61,7 +61,8 @@ def test_generate_emoji_missing_parameters():
     """
     response = client.post("/emoji", json={})
     assert response.status_code == 200  # All fields have default values
-    assert "detail" in response.json()
+    assert response.headers["content-type"] == "image/png"
+    assert len(response.content) > 0
     assert "field required" in response.json()["detail"][0]["msg"]
 
 def test_generate_emoji_invalid_data_type():
@@ -92,7 +93,7 @@ def test_generate_emoji_out_of_range_quality():
     )
     assert response.status_code == 422  # Unprocessable Entity
     assert "detail" in response.json()
-    assert "ensure this value is less than or equal to 100" in response.json()["detail"][0]["msg"]
+    assert "Input should be less than or equal to 100" in response.json()["detail"][0]["msg"]
 
 def test_generate_emoji_invalid_align():
     """
@@ -120,7 +121,7 @@ def test_generate_emoji_empty_text():
         },
     )
     assert response.status_code == 422
-    assert "ensure this value has at least 1 characters" in response.json()["detail"][0]["msg"]
+    assert "String should have at least 1 character" in response.json()["detail"][0]["msg"]
 
 @patch('src.services.emoji_service.generate_emoji_logic')
 def test_generate_emoji_internal_server_error(mock_generate_emoji_logic):
