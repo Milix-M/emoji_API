@@ -24,7 +24,7 @@ class EmojiParamDTO:
     """
 
     FONT_NAME_PATH_MAPPING = {
-        "M+ 1p black": "/fonts/mplus-1p-black.ttf",
+        "M+ 1p black": "/fonts/MPLUS1p-Black.ttf",
         "Rounded M+ 1p black": "/fonts/rounded-mplus-1p-black.ttf",
     }
     text: str = "絵文\n字。"
