@@ -8,12 +8,11 @@ import falcon
 logging.basicConfig(
     level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 )
-# このモジュール用のロガーを取得
 logger = logging.getLogger(__name__)
 
 
 # 'align'パラメータの選択肢をリテラル型で定義
-# これにより、'left', 'center', 'right' 以外は型チェッカーでエラーにできます
+# これにより、'left', 'center', 'right' 以外は型チェッカーでエラーにできる
 AlignOptions = Literal["left", "center", "right"]
 
 
@@ -23,6 +22,7 @@ class EmojiParamDTO:
     テキスト画像生成のためのパラメータを保持するDTOクラス
     """
 
+    #  フォント名とそのパスのマッピング
     FONT_NAME_PATH_MAPPING = {
         "M+ 1p black": "/fonts/MPLUS1p-Black.ttf",
         "Rounded M+ 1p black": "/fonts/rounded-mplus-1p-black.ttf",
@@ -30,6 +30,8 @@ class EmojiParamDTO:
         "Sawarabi Mincho": "/fonts/SawarabiMincho-Regular.ttf",
         "YuseiMagic": "/fonts/YuseiMagic-Regular.ttf",
     }
+
+    # DTO フィールド
     text: str = "絵文\n字。"
     width: int = 128
     height: int = 128
@@ -80,13 +82,13 @@ class EmojiParamDTO:
                 quality=req_dto.quality,
             )
             logger.info("絵文字生成完了")
+            return emoji_raw
         except Exception as e:
-            logger.error(f"絵文字生成でエラーが発生: {e}")
-
-        with open("emoji.png", "wb") as f:
-            f.write(emoji_raw)
-
-        return
+            logger.error(f"絵文字生成でエラーが発生しました: {e}")
+            raise falcon.HTTPInternalServerError(
+                title="Image generation error",
+                description=f"An error occurred while generating the image: {e}",
+            )
 
     def on_post(self, req, resp):
         """
@@ -106,11 +108,17 @@ class EmojiParamDTO:
 
         logger.info(f"画像生成リクエストを受け付けました: {req_param}")
 
-        self.emoji_generate(dto)
+        try:
+            image_data = self.emoji_generate(dto)
 
-        resp.status = falcon.HTTP_200
-        resp.media = {
-            "status": "success",
-            "message": "Image generation request received.",
-            "received_parameters": req_param,
-        }
+            resp.status = falcon.HTTP_200
+            resp.content_type = falcon.MEDIA_PNG
+            resp.data = image_data
+
+        except Exception as e:
+            # 画像生成中のエラーをハンドリング
+            logger.error(f"リクエスト処理中にエラー: {e}")
+            raise falcon.HTTPInternalServerError(
+                title="Image Generation Failed",
+                description="An unexpected error occurred during image generation.",
+            )
