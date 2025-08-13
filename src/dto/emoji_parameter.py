@@ -1,8 +1,10 @@
 import logging
-from dataclasses import dataclass, asdict
+from dataclasses import dataclass
 from typing import Literal
+
 import emojilib
 import falcon
+
 from ..common.constants import Fonts
 
 # ログ設定
