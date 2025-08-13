@@ -1,9 +1,11 @@
 import falcon
 from wsgiref.simple_server import make_server
 from .dto.emoji_parameter import EmojiParamDTO
+from .dto.font_resorce import EmojiResource
 
 api = falcon.App()
 api.add_route("/emoji", EmojiParamDTO())
+api.add_route("/fonts", EmojiResource())
 
 
 if __name__ == "__main__":
