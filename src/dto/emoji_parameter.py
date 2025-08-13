@@ -3,12 +3,11 @@ from typing import Literal
 
 # 'align'パラメータの選択肢をリテラル型で定義
 AlignOptions = Literal["left", "center", "right"]
+"""Literal type for text alignment options."""
 
 
 class EmojiParam(BaseModel):
-    """
-    テキスト画像生成のためのパラメータを保持するPydanticモデル
-    """
+    """Pydantic model for holding parameters for text image generation."""
 
     text: str = Field(default="絵文\n字。", description="画像に表示するテキスト")
     width: int = Field(default=128, description="画像の幅")
