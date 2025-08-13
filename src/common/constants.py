@@ -1,4 +1,11 @@
-class Fonts:
+class ConstantMeta(type):
+    def __setattr__(cls, key, value):
+        if key in cls.__dict__:
+            raise AttributeError("Cannot reassign constant")
+        super().__setattr__(key, value)
+
+
+class Fonts(metaclass=ConstantMeta):
     """フォントに関する定数を定義するクラス"""
 
     FONT_NAME_PATH_MAPPING = {
