@@ -1,6 +1,4 @@
 # docker-composeのバージョンを指定
-version: '3.8'
-
 services:
   # サービス名を「app」と定義
   app:
@@ -23,4 +21,4 @@ services:
     # コンテナの標準入力を開き、TTYを割り当てる (インタラクティブな操作に必要)
     stdin_open: true
     tty: true
-    command: python -m src.app
+    command: python -m uvicorn src.app:app --host 0.0.0.0 --port 8000 --reload
