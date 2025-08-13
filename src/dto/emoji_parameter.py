@@ -9,7 +9,7 @@ AlignOptions = Literal["left", "center", "right"]
 class EmojiParam(BaseModel):
     """Pydantic model for holding parameters for text image generation."""
 
-    text: str = Field(default="絵文\n字。", description="画像に表示するテキスト")
+    text: str = Field(default="絵文\n字。", description="画像に表示するテキスト", min_length=1)
     width: int = Field(default=128, description="画像の幅")
     height: int = Field(default=128, description="画像の高さ")
     color: str = Field(default="#000000FF", description="文字色 (RGBA)")
@@ -19,4 +19,4 @@ class EmojiParam(BaseModel):
     disable_stretch: bool = Field(default=False, description="画像の引き伸ばしを無効にするかどうか")
     typeface_name: str = Field(default="M+ 1p black", description="使用するフォント名")
     format: str = Field(default="png", description="出力画像形式")
-    quality: int = Field(default=100, description="画質 (JPEGの場合に有効)")
+    quality: int = Field(default=100, description="画質 (JPEGの場合に有効)", ge=0, le=100)
