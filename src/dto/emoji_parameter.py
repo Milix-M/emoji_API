@@ -3,6 +3,7 @@ from dataclasses import dataclass, asdict
 from typing import Literal
 import emojilib
 import falcon
+from ..common.constants import Fonts
 
 # ログ設定
 logging.basicConfig(
@@ -22,16 +23,6 @@ class EmojiParamDTO:
     テキスト画像生成のためのパラメータを保持するDTOクラス
     """
 
-    #  フォント名とそのパスのマッピング
-    FONT_NAME_PATH_MAPPING = {
-        "M+ 1p black": "/fonts/MPLUS1p-Black.ttf",
-        "Rounded M+ 1p black": "/fonts/rounded-mplus-1p-black.ttf",
-        "Noto Sans JP": "/fonts/NotoSansJP-Black.ttf",
-        "Sawarabi Mincho": "/fonts/SawarabiMincho-Regular.ttf",
-        "YuseiMagic": "/fonts/YuseiMagic-Regular.ttf",
-    }
-
-    # DTO フィールド
     text: str = "絵文\n字。"
     width: int = 128
     height: int = 128
@@ -40,7 +31,7 @@ class EmojiParamDTO:
     align: AlignOptions = "center"
     size_fixed: bool = False
     disable_stretch: bool = False
-    typeface_file: str = FONT_NAME_PATH_MAPPING["M+ 1p black"]
+    typeface_file: str = Fonts.FONT_NAME_PATH_MAPPING["M+ 1p black"]["path"]
     typeface_name: str = "M+ 1p black"
     format: str = "png"
     quality: int = 100
@@ -59,7 +50,9 @@ class EmojiParamDTO:
         """
 
         # フォント名からフォントパスを出す
-        req_dto.typeface_file = self.FONT_NAME_PATH_MAPPING[req_dto.typeface_name]
+        req_dto.typeface_file = Fonts.FONT_NAME_PATH_MAPPING[req_dto.typeface_name][
+            "path"
+        ]
 
         # Noneにしないと何故かエラーになる
         req_dto.typeface_name = None
