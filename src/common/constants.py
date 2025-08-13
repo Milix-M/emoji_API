@@ -1,12 +1,14 @@
 class ConstantMeta(type):
+    """Metaclass to prevent reassignment of constants."""
     def __setattr__(cls, key, value):
+        """Prevents reassignment of attributes once set."""
         if key in cls.__dict__:
             raise AttributeError("Cannot reassign constant")
         super().__setattr__(key, value)
 
 
 class Fonts(metaclass=ConstantMeta):
-    """フォントに関する定数を定義するクラス"""
+    """Defines constants related to fonts."""
 
     FONT_NAME_PATH_MAPPING = {
         "M+ 1p black": {
