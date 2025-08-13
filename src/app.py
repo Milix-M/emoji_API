@@ -1,16 +1,35 @@
-import falcon
-from wsgiref.simple_server import make_server
-from .dto.emoji_parameter import EmojiParamDTO
-from .dto.font_resorce import EmojiResource
+"""Main application file for the Emoji API.
 
-api = falcon.App(cors_enable=True)
-api.add_route("/emoji", EmojiParamDTO())
-api.add_route("/fonts", EmojiResource())
+This file initializes the FastAPI application, configures logging, sets up CORS middleware,
+and includes the API routers.
+"""
 
+import logging
+from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
+from src.routers import emoji
 
-if __name__ == "__main__":
-    with make_server("", 8000, api) as httpd:
-        print("Serving on port 8000...")
+# ログ設定
+logging.basicConfig(
+    level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+)
+logger = logging.getLogger(__name__)
 
-        # Serve until process is killed
-        httpd.serve_forever()
+app = FastAPI(
+    title="Emoji API",
+    description="API for generating custom emoji images with text.",
+    version="1.0.0",
+)
+"""FastAPI application instance."""
+
+# CORS設定
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+# ルーターの登録
+app.include_router(emoji.router)
