@@ -63,7 +63,6 @@ def test_generate_emoji_missing_parameters():
     assert response.status_code == 200  # All fields have default values
     assert response.headers["content-type"] == "image/png"
     assert len(response.content) > 0
-    assert "field required" in response.json()["detail"][0]["msg"]
 
 def test_generate_emoji_invalid_data_type():
     """
